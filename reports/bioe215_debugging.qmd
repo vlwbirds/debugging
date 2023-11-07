@@ -1,0 +1,61 @@
+---
+title: "bioe215_debugging"
+format: html
+editor: visual
+---
+
+## Debugging with browser()
+
+```{r}
+library(palmerpenguins)
+library(tidyverse)
+
+traits_r2 <- function(trait1, trait2) {
+  summary(lm(trait1 ~ trait2))$r.squared
+}
+
+penguins %>% 
+  summarize(flipper_bill_r2 = traits_r2(flipper_length_mm, bill_length_mm))
+
+```
+
+**Q1** How would you describe the error? I\'m not asking you describe the *cause* of the error yet. Describe how the output is different than what you would expect.
+
+There is no data output. It doesn't have r2 values
+
+Q2: Where would you add browser() to explore the cause of the error?
+
+I added it to the function before summary
+
+Q3: Does the body of traits_r2 use list or atomic vector indexing? Does it use indexing by position, logic, or name?
+
+Q4: What's the cause of the error? How would you fix it?
+
+\$rsquared should be \$r.squared
+
+```{r}
+# Pipeline 1
+penguins %>% 
+  group_by(species) %>% 
+  summarize(flipper_bill_r2 = traits_r2(flipper_length_mm, bill_length_mm))
+
+# Pipeline 2
+penguins %>% 
+  group_by(species, island) %>% 
+  summarize(flipper_bill_r2 = traits_r2(flipper_length_mm, bill_length_mm),
+            .groups = "drop")
+
+# Pipeline 3
+penguins %>% 
+  group_by(species, sex, island) %>% 
+  summarize(flipper_bill_r2 = traits_r2(flipper_length_mm, bill_length_mm),
+            .groups = "drop")
+```
+
+Q5: How many times does Pipeline 1 call traits_r2()? How about Pipeline 2?
+
+It calls it once for each species in pipe 1, so 3 times. In pipe 2, it runs 5 times for 3 species and 3 islands, but it's not 6 because not all species are on every island?
+
+Q6: Create Pipeline 3 that additionally groups by sex. How many times does Pipeline 3 call traits_r2()?
+
+It ran 13 times, including NAs in the sex

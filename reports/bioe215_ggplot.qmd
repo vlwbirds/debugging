@@ -1,0 +1,121 @@
+---
+title: "ggplot"
+format: html
+editor: visual
+---
+
+## Grammar of Graphics -- ggplot
+
+syntax: ggplot(data, aesthetics(x and y variables) then how the data should be presented
+
+```{r}
+library(palmerpenguins)
+library(tidyverse)
+
+ggplot(data = penguins, aes(x = body_mass_g, y = flipper_length_mm)) +
+  geom_point()
+```
+
+Q10: Change the aesthetics of the plot to show bill_depth_mm on the y-axis.
+
+```{r}
+
+ggplot(data = penguins, aes(x = body_mass_g, y = bill_depth_mm)) +
+  geom_point()
+```
+
+Q11: Add an aesthetic for color, so points will be color-coded by species.
+
+```{r}
+ggplot(data = penguins, aes(x = body_mass_g, y = bill_depth_mm, color = species)) +
+  geom_point()
+```
+
+## Customizing scales
+
+```{r}
+ggplot(data = penguins) +
+  # You can also define aesthetics directly inside the geometries
+  geom_point(aes(x = body_mass_g, 
+                 y = flipper_length_mm,
+                 color = species)) +
+  # x aesthetic, continuous scale
+  scale_x_continuous(
+    # change the axis name
+    name = "Body mass (g)",
+    # change the limits
+    limits = c(2000, 8000)
+  ) +
+  # color aesthetic, manual scale
+  scale_color_manual(
+    # set the values for the colors
+    values = c(Adelie = "cornflowerblue",
+               Chinstrap = "firebrick",
+               Gentoo = "darkorchid")
+  )
+```
+
+Q12: What function would you use to customize the y-axis? Use that function to expand the y-axis limits to include 150 and 250.
+
+Q13: Look up the help for scale_color_brewer(). Change the color scale to use the "Dark2" color palette.
+
+```{r}
+ggplot(data = penguins) +
+  # You can also define aesthetics directly inside the geometries
+  geom_point(aes(x = body_mass_g, 
+                 y = flipper_length_mm,
+                 color = species)) +
+  # x aesthetic, continuous scale
+  scale_x_continuous(
+    # change the axis name
+    name = "Body mass (g)",
+    # change the limits
+    limits = c(2000, 8000)
+  ) +
+  scale_y_continuous(
+    name = "Flipper length (mm)",
+    limits = c(150, 250)
+  ) +
+  # color aesthetic, color_brewer
+  scale_color_brewer(
+    # set the values for the colors
+    palette = "Dark2"
+  )
+```
+
+**Q14:** Use `geom_histogram()` to visualize the distribution of body masses.
+
+```{r}
+ggplot(data = penguins, aes(x = body_mass_g)) +
+  geom_histogram()
+```
+
+**Q15:** Use `geom_boxplot()` to create boxplots of the flipper lengths by species. It should look like the figure below. Hint: what aesthetics will you use?
+
+```{r}
+ggplot(data = penguins) +
+  geom_boxplot(aes(x = species, y = flipper_length_mm))
+```
+
+**Q16:** `geom_pointrange()` is like `geom_point()` with the addition of error bars. Like `geom_point()`, `geom_pointrange()` takes `x` and `y` aesthetics, but it also takes `xmin`, `xmax`, `ymin` and `ymax` aesthetics. Create a figure that shows the mean
+sd of each penguin species\' body mass and flipper lengths using points
+and error bars; it should look like the figure below. First, create a
+summary data frame that calculates the mean and standard deviation of
+the two variables you need by each species. Then use that summary data
+frame to create your figure. Hint: `geom_pointrange()` takes `xmin` ***or*** `xmax`, same for `ymin` ***or*** `ymax`. So you\'ll need to call `geom_pointrange()` twice and specify the aesthetics within the geometry.
+
+```{r}
+penguins %>% 
+  group_by(species) %>% 
+  drop_na(body_mass_g, flipper_length_mm) %>% 
+  mutate(sd_mass = sd(body_mass_g),
+            sd_flip = sd(flipper_length_mm)
+            )
+
+ggplot(data = penguins, aes(x = body_mass_g, y = flipper_length_mm)) +
+  geom_pointrange(aes(xmin = body_mass_g, 
+                      xmax = body_mass_g, 
+                      ymin = flipper_length_mm, 
+                      ymax = flipper_length_mm))
+
+```
